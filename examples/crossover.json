@@ -1,0 +1,25 @@
+{
+  "experiment_id": "revolut-modern-001",
+  "candidate_id": "crossover-example",
+  "period": "build",
+  "strategy": {
+    "name": "20/50 SMA crossover with hourly volatility filter",
+    "assets": ["BTCUSDT"],
+    "features": {
+      "fast": {"kind": "sma", "window": 20},
+      "slow": {"kind": "sma", "window": 50},
+      "volatility": {"kind": "volatility", "window": 20}
+    },
+    "mode": "signals",
+    "entry": {
+      "op": "all",
+      "args": [
+        {"op": "crosses_above", "args": [{"op": "feature", "name": "fast"}, {"op": "feature", "name": "slow"}]},
+        {"op": "lt", "args": [{"op": "feature", "name": "volatility"}, {"op": "constant", "value": 0.01}]}
+      ]
+    },
+    "exit": {"op": "crosses_below", "args": [{"op": "feature", "name": "fast"}, {"op": "feature", "name": "slow"}]},
+    "allocation": "fixed_fraction",
+    "fraction": 0.1
+  }
+}

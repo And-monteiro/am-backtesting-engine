@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "known_edge": {
+    "hours": 2400,
+    "predictable_return": 0.01,
+    "required_completed_trades": 300,
+    "minimum_net_return": 0.5,
+    "accounting_absolute_tolerance": 0.000001
+  },
+  "noise": {
+    "seeds": [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119],
+    "hours": 2400,
+    "hourly_return_bound": 0.002,
+    "positive_fraction_upper_bound": 0.5,
+    "mean_net_return_upper_bound": 0.0,
+    "maximum_qualified_runs": 0,
+    "minimum_completed_trades_per_run": 300,
+    "rationale": "Predefined momentum, reversal and always-enter/one-hour-hold rules on independent bounded zero-mean simple returns; costs dominate this fixture. This check detects artificial edge in these fixed fixtures, not universal absence of false discoveries."
+  },
+  "cheat": {
+    "reject_negative_lag": true,
+    "reject_same_open_execution_override": true,
+    "reject_unknown_future_fields": true,
+    "require_close_to_next_open_timing": true
+  }
+}

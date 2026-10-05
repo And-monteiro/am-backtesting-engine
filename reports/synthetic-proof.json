@@ -1,0 +1,106 @@
+{
+  "passed": true,
+  "engine_sha256": "fb76f3d31f2cb2d5ea60955097cbe3d4363b132471d46aaa464c3503058b877f",
+  "criteria_sha256": "77aaef0ca2e55cc1e3fb30556e9f55fdaff30bd3796610eafe2d755a4adc2c68",
+  "defaults_sha256": "c019f340246e30614cf639937061e99466e600568b7fa5062155af7f9be4d198",
+  "rules_sha256": "0fee996ba20ce720ffd7b0f637db5562eb4b45760e8beb4fcf6fb045e74fefc1",
+  "criteria": {
+    "version": "1.0",
+    "known_edge": {
+      "hours": 2400,
+      "predictable_return": 0.01,
+      "required_completed_trades": 300,
+      "minimum_net_return": 0.5,
+      "accounting_absolute_tolerance": 1e-06
+    },
+    "noise": {
+      "seeds": [
+        100,
+        101,
+        102,
+        103,
+        104,
+        105,
+        106,
+        107,
+        108,
+        109,
+        110,
+        111,
+        112,
+        113,
+        114,
+        115,
+        116,
+        117,
+        118,
+        119
+      ],
+      "hours": 2400,
+      "hourly_return_bound": 0.002,
+      "positive_fraction_upper_bound": 0.5,
+      "mean_net_return_upper_bound": 0.0,
+      "maximum_qualified_runs": 0,
+      "minimum_completed_trades_per_run": 300,
+      "rationale": "Predefined momentum, reversal and always-enter/one-hour-hold rules on independent bounded zero-mean simple returns; costs dominate this fixture. This check detects artificial edge in these fixed fixtures, not universal absence of false discoveries."
+    },
+    "cheat": {
+      "reject_negative_lag": true,
+      "reject_same_open_execution_override": true,
+      "reject_unknown_future_fields": true,
+      "require_close_to_next_open_timing": true
+    }
+  },
+  "rules": {
+    "schema_version": "1.0",
+    "initial_cash": 1000.0,
+    "currency": "USDT",
+    "min_trades": 300,
+    "benchmark_annual_return": 0.02,
+    "max_drawdown": 0.2,
+    "min_positive_chunks": 2,
+    "correlation_limit": 0.7,
+    "correlation_min_days": 90,
+    "small_gap_hours": 4,
+    "idle_cash_annual_return": 0.0,
+    "venue": {
+      "name": "revolut_x_pt",
+      "fee_bps": 9.0,
+      "adverse_execution_bps": 5.0,
+      "fee_asset": "quote"
+    }
+  },
+  "checks": [
+    {
+      "name": "known_edge",
+      "passed": true,
+      "net_return": 1.3633696835773916,
+      "completed_trades": 1199,
+      "accounting_error": 1.7280399333685637e-11,
+      "next_open_timing": true
+    },
+    {
+      "name": "pure_noise",
+      "passed": true,
+      "trials": 60,
+      "mean_net_return": -0.22829281699882248,
+      "positive_fraction": 0.0,
+      "qualified_runs": 0,
+      "minimum_trades": 771,
+      "fixture_scope": "Predefined momentum, reversal and always-enter/one-hour-hold rules on independent bounded zero-mean simple returns; costs dominate this fixture. This check detects artificial edge in these fixed fixtures, not universal absence of false discoveries."
+    },
+    {
+      "name": "cheating_signal",
+      "passed": true,
+      "rejected": {
+        "negative_lag": true,
+        "future_field": true,
+        "same_open_override": true
+      },
+      "legitimate_close_to_next_open": true
+    }
+  ],
+  "real_strategies_run": false,
+  "sealed_data_read": false,
+  "report_id": "8ab66bd77207fc49d364f012136d25657ddcf3f531c540fe15a875f243256bb5"
+}

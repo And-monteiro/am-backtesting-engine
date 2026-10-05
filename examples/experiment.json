@@ -1,0 +1,10 @@
+{
+  "experiment_id": "revolut-modern-001",
+  "track": "modern",
+  "rules": {
+    "initial_cash": 1000,
+    "max_drawdown": 0.2,
+    "min_trades": 300,
+    "venue": {"name": "revolut_x_pt", "fee_bps": 9, "adverse_execution_bps": 5, "fee_asset": "quote"}
+  }
+}

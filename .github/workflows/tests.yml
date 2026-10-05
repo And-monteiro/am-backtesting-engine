@@ -1,0 +1,41 @@
+name: Tests and synthetic proof
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e '.[test]'
+      - run: ruff check . && ruff format --check .
+      - run: pytest -q
+      - run: python -m am_backtesting prove
+      - name: Verify published contracts
+        run: |
+          python -m am_backtesting openapi > /tmp/openapi.json
+          diff contracts/openapi.json /tmp/openapi.json
+      - name: Container tests and proof
+        run: |
+          docker compose config --quiet
+          docker build --target test -t am-engine-tests .
+          docker run --rm am-engine-tests
+          docker build --target runtime -t am-engine .
+          docker run --rm am-engine python -m am_backtesting prove
+      - name: Container API smoke test
+        run: |
+          docker run -d --name am-api -p 8000:8000 am-engine
+          for attempt in $(seq 1 30); do
+            if curl --fail http://localhost:8000/health; then break; fi
+            sleep 1
+          done
+          curl --fail http://localhost:8000/openapi.json
+          docker stop am-api
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: synthetic-proof
+          path: state/proof.json

@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "initial_cash": 1000,
+  "currency": "USDT",
+  "min_trades": 300,
+  "benchmark_annual_return": 0.02,
+  "max_drawdown": 0.2,
+  "min_positive_chunks": 2,
+  "correlation_limit": 0.7,
+  "correlation_min_days": 90,
+  "small_gap_hours": 4,
+  "idle_cash_annual_return": 0.0,
+  "venue": {
+    "name": "revolut_x_pt",
+    "fee_bps": 9,
+    "adverse_execution_bps": 5,
+    "fee_asset": "quote"
+  }
+}

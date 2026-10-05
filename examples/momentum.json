@@ -1,0 +1,16 @@
+{
+  "experiment_id": "revolut-modern-001",
+  "candidate_id": "momentum-example",
+  "period": "build",
+  "strategy": {
+    "name": "Weekly equal-weight top-five positive 90-day momentum",
+    "assets": ["ADAUSDT", "BCHUSDT", "BNBUSDT", "BTCUSDT", "DOGEUSDT", "ETHUSDT", "LINKUSDT", "NEARUSDT", "SOLUSDT", "TRXUSDT", "UNIUSDT", "XLMUSDT", "XRPUSDT", "ZECUSDT"],
+    "features": {"momentum": {"kind": "return", "window": 90, "timeframe": "1d"}},
+    "mode": "rank",
+    "entry": {"op": "gt", "args": [{"op": "feature", "name": "momentum"}, {"op": "constant", "value": 0}]},
+    "rank_by": {"op": "feature", "name": "momentum"},
+    "top_n": 5,
+    "allocation": "equal_weight",
+    "schedule": {"frequency": "weekly", "hour_utc": 0, "weekday": 0}
+  }
+}

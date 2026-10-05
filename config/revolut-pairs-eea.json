@@ -1,0 +1,140 @@
+{
+  "source": "https://revx.revolut.com/api/1.0/public/configuration/pairs?region=EEA",
+  "checked_date": "2026-10-05",
+  "region": "EEA",
+  "pairs": {
+    "BTC/USDC": {
+      "base": "BTC",
+      "quote": "USDC",
+      "base_step": "0.00000001",
+      "quote_step": "0.01",
+      "min_order_size": "0.00000001",
+      "max_order_size": "200",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "DOGE/USDC": {
+      "base": "DOGE",
+      "quote": "USDC",
+      "base_step": "0.0001",
+      "quote_step": "0.00001",
+      "min_order_size": "0.0001",
+      "max_order_size": "10000000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "ADA/USDC": {
+      "base": "ADA",
+      "quote": "USDC",
+      "base_step": "0.0001",
+      "quote_step": "0.00001",
+      "min_order_size": "0.0001",
+      "max_order_size": "5000000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "TRX/USDC": {
+      "base": "TRX",
+      "quote": "USDC",
+      "base_step": "0.0001",
+      "quote_step": "0.00001",
+      "min_order_size": "0.0001",
+      "max_order_size": "20000000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "ETH/USDC": {
+      "base": "ETH",
+      "quote": "USDC",
+      "base_step": "0.00000001",
+      "quote_step": "0.01",
+      "min_order_size": "0.00000001",
+      "max_order_size": "5000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "LINK/USDC": {
+      "base": "LINK",
+      "quote": "USDC",
+      "base_step": "0.000001",
+      "quote_step": "0.001",
+      "min_order_size": "0.000001",
+      "max_order_size": "100000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "BNB/USDC": {
+      "base": "BNB",
+      "quote": "USDC",
+      "base_step": "0.0000001",
+      "quote_step": "0.001",
+      "min_order_size": "0.0000001",
+      "max_order_size": "1000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "XRP/USDC": {
+      "base": "XRP",
+      "quote": "USDC",
+      "base_step": "0.00001",
+      "quote_step": "0.0001",
+      "min_order_size": "0.00001",
+      "max_order_size": "1000000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "BCH/USDC": {
+      "base": "BCH",
+      "quote": "USDC",
+      "base_step": "0.0000001",
+      "quote_step": "0.001",
+      "min_order_size": "0.0000001",
+      "max_order_size": "10000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "SOL/USDC": {
+      "base": "SOL",
+      "quote": "USDC",
+      "base_step": "0.000001",
+      "quote_step": "0.001",
+      "min_order_size": "0.000001",
+      "max_order_size": "20000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    },
+    "XLM/USDC": {
+      "base": "XLM",
+      "quote": "USDC",
+      "base_step": "0.0001",
+      "quote_step": "0.000001",
+      "min_order_size": "0.0001",
+      "max_order_size": "5000000",
+      "min_order_size_quote": "0.1",
+      "max_order_size_quote": "1000000",
+      "status": "active",
+      "slippage": 5
+    }
+  },
+  "note": "Relevant current EEA USDC pairs only. This snapshot does not assert historical availability or convert USDT prices to USDC."
+}
