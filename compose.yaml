@@ -1,0 +1,37 @@
+services:
+  engine:
+    build: .
+    ports: ["127.0.0.1:8000:8000"]
+    environment:
+      AM_DATA_ROOT: /data
+      AM_STATE_ROOT: /state
+      AM_CONFIG_ROOT: /app/config
+    volumes:
+      - ./data/build:/data/build:ro
+      - ./data/unlocked:/data/unlocked:ro
+      - engine-state:/state
+    read_only: true
+    tmpfs: [/tmp]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+  prove:
+    build: .
+    profiles: [tools]
+    command: ["python", "-m", "am_backtesting", "prove"]
+    environment:
+      AM_STATE_ROOT: /state
+      AM_CONFIG_ROOT: /app/config
+    volumes: ["engine-state:/state"]
+  prepare:
+    build: .
+    profiles: [tools]
+    user: "0:0"
+    command: ["python", "-m", "am_backtesting", "prepare", "--source", "/prices", "--destination", "/data"]
+    volumes:
+      - ./prices:/prices:ro
+      - ./data:/data
+volumes:
+  engine-state:

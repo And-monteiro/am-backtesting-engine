@@ -1,0 +1,1581 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AM Backtesting Engine",
+    "description": "Synchronous declarative spot backtests. Sealed periods require explicit administrative unlock.",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/proof": {
+      "get": {
+        "summary": "Proof",
+        "operationId": "proof_v1_proof_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments": {
+      "post": {
+        "summary": "Create Experiment",
+        "operationId": "create_experiment_v1_experiments_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExperimentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/experiments/{experiment_id}": {
+      "get": {
+        "summary": "Experiment",
+        "operationId": "experiment_v1_experiments__experiment_id__get",
+        "parameters": [
+          {
+            "name": "experiment_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Experiment Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperimentResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/backtests": {
+      "post": {
+        "summary": "Backtest",
+        "operationId": "backtest_v1_backtests_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BacktestResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/backtests/{run_id}": {
+      "get": {
+        "summary": "Result",
+        "operationId": "result_v1_backtests__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BacktestResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/retention": {
+      "post": {
+        "summary": "Retention",
+        "operationId": "retention_v1_retention_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrelationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RetentionResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BacktestResult": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version"
+          },
+          "status": {
+            "type": "string",
+            "const": "completed",
+            "title": "Status"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "experiment_id": {
+            "type": "string",
+            "title": "Experiment Id"
+          },
+          "candidate_id": {
+            "type": "string",
+            "title": "Candidate Id"
+          },
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          },
+          "dataset_id": {
+            "type": "string",
+            "title": "Dataset Id"
+          },
+          "strategy_id": {
+            "type": "string",
+            "title": "Strategy Id"
+          },
+          "engine_version": {
+            "type": "string",
+            "title": "Engine Version"
+          },
+          "engine_sha256": {
+            "type": "string",
+            "title": "Engine Sha256"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "build",
+              "test"
+            ],
+            "title": "Period"
+          },
+          "track": {
+            "type": "string",
+            "enum": [
+              "modern",
+              "xmr"
+            ],
+            "title": "Track"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Start"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "title": "End"
+          },
+          "sealed_data_used": {
+            "type": "boolean",
+            "title": "Sealed Data Used"
+          },
+          "unseen_data_spent": {
+            "type": "boolean",
+            "title": "Unseen Data Spent"
+          },
+          "price_source": {
+            "type": "string",
+            "const": "Binance USDT",
+            "title": "Price Source"
+          },
+          "venue_profile": {
+            "type": "string",
+            "enum": [
+              "revolut_x_pt",
+              "alpaca"
+            ],
+            "title": "Venue Profile"
+          },
+          "constraints": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Constraints"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/Metrics"
+          },
+          "rules": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/RuleOutcome"
+            },
+            "type": "object",
+            "title": "Rules"
+          },
+          "qualified": {
+            "type": "boolean",
+            "title": "Qualified"
+          },
+          "daily_returns": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Daily Returns"
+          },
+          "equity": {
+            "items": {
+              "$ref": "#/components/schemas/EquityPoint"
+            },
+            "type": "array",
+            "title": "Equity"
+          },
+          "fills": {
+            "items": {
+              "$ref": "#/components/schemas/Fill"
+            },
+            "type": "array",
+            "title": "Fills"
+          },
+          "completed_trades": {
+            "items": {
+              "$ref": "#/components/schemas/CompletedTrade"
+            },
+            "type": "array",
+            "title": "Completed Trades"
+          },
+          "ending_cash": {
+            "type": "number",
+            "title": "Ending Cash"
+          },
+          "ending_positions": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Ending Positions"
+          },
+          "dust_positions": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Dust Positions"
+          },
+          "costs": {
+            "$ref": "#/components/schemas/Costs"
+          },
+          "data_quality": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DataQuality"
+            },
+            "type": "object",
+            "title": "Data Quality"
+          },
+          "unresolved_stale_positions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Unresolved Stale Positions"
+          },
+          "pending_orders_at_end": {
+            "type": "integer",
+            "title": "Pending Orders At End"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "schema_version",
+          "status",
+          "run_id",
+          "experiment_id",
+          "candidate_id",
+          "policy_id",
+          "dataset_id",
+          "strategy_id",
+          "engine_version",
+          "engine_sha256",
+          "period",
+          "track",
+          "start",
+          "end",
+          "sealed_data_used",
+          "unseen_data_spent",
+          "price_source",
+          "venue_profile",
+          "constraints",
+          "metrics",
+          "rules",
+          "qualified",
+          "daily_returns",
+          "equity",
+          "fills",
+          "completed_trades",
+          "ending_cash",
+          "ending_positions",
+          "dust_positions",
+          "costs",
+          "data_quality",
+          "unresolved_stale_positions",
+          "pending_orders_at_end"
+        ],
+        "title": "BacktestResult"
+      },
+      "Comparison": {
+        "properties": {
+          "a": {
+            "type": "string",
+            "title": "A"
+          },
+          "b": {
+            "type": "string",
+            "title": "B"
+          },
+          "days": {
+            "type": "integer",
+            "title": "Days"
+          },
+          "correlation": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correlation"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "compared",
+              "not_comparable"
+            ],
+            "title": "Status"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "a",
+          "b",
+          "days",
+          "correlation",
+          "status"
+        ],
+        "title": "Comparison"
+      },
+      "CompletedTrade": {
+        "properties": {
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "entry_open": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Entry Open"
+          },
+          "exit_open": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Exit Open"
+          },
+          "net_pnl": {
+            "type": "number",
+            "title": "Net Pnl"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "asset",
+          "entry_open",
+          "exit_open",
+          "net_pnl"
+        ],
+        "title": "CompletedTrade"
+      },
+      "CorrelationRequest": {
+        "properties": {
+          "run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 100,
+            "minItems": 2,
+            "title": "Run Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_ids"
+        ],
+        "title": "CorrelationRequest"
+      },
+      "Costs": {
+        "properties": {
+          "fees": {
+            "type": "number",
+            "title": "Fees"
+          },
+          "adverse_execution": {
+            "type": "number",
+            "title": "Adverse Execution"
+          },
+          "financing": {
+            "type": "number",
+            "const": 0.0,
+            "title": "Financing"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "fees",
+          "adverse_execution",
+          "financing"
+        ],
+        "title": "Costs"
+      },
+      "DataQuality": {
+        "properties": {
+          "missing_hours": {
+            "type": "integer",
+            "title": "Missing Hours"
+          },
+          "synthetic_hours": {
+            "type": "integer",
+            "title": "Synthetic Hours"
+          },
+          "gap_episodes": {
+            "type": "integer",
+            "title": "Gap Episodes"
+          },
+          "skipped_decisions": {
+            "type": "integer",
+            "title": "Skipped Decisions"
+          },
+          "expired_orders": {
+            "type": "integer",
+            "title": "Expired Orders"
+          },
+          "rejected_orders": {
+            "type": "integer",
+            "title": "Rejected Orders"
+          },
+          "stale_position_hours": {
+            "type": "integer",
+            "title": "Stale Position Hours"
+          },
+          "terminal_liquidation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminal Liquidation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "missing_hours",
+          "synthetic_hours",
+          "gap_episodes",
+          "skipped_decisions",
+          "expired_orders",
+          "rejected_orders",
+          "stale_position_hours",
+          "terminal_liquidation"
+        ],
+        "title": "DataQuality"
+      },
+      "Duplicate": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "duplicate_of": {
+            "type": "string",
+            "title": "Duplicate Of"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "run_id",
+          "duplicate_of"
+        ],
+        "title": "Duplicate"
+      },
+      "EquityPoint": {
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Time"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "time",
+          "value"
+        ],
+        "title": "EquityPoint"
+      },
+      "ErrorBody": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "ErrorBody"
+      },
+      "ExperimentCreate": {
+        "properties": {
+          "experiment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Experiment Id"
+          },
+          "track": {
+            "type": "string",
+            "enum": [
+              "modern",
+              "xmr"
+            ],
+            "title": "Track",
+            "default": "modern"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/Rules"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "experiment_id"
+        ],
+        "title": "ExperimentCreate"
+      },
+      "ExperimentResponse": {
+        "properties": {
+          "experiment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Experiment Id"
+          },
+          "track": {
+            "type": "string",
+            "enum": [
+              "modern",
+              "xmr"
+            ],
+            "title": "Track",
+            "default": "modern"
+          },
+          "rules": {
+            "$ref": "#/components/schemas/Rules"
+          },
+          "dataset_id": {
+            "type": "string",
+            "title": "Dataset Id"
+          },
+          "policy_id": {
+            "type": "string",
+            "title": "Policy Id"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "experiment_id",
+          "dataset_id",
+          "policy_id"
+        ],
+        "title": "ExperimentResponse"
+      },
+      "Expression": {
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "constant",
+              "field",
+              "feature",
+              "lag",
+              "add",
+              "subtract",
+              "multiply",
+              "divide",
+              "gt",
+              "gte",
+              "lt",
+              "lte",
+              "eq",
+              "all",
+              "any",
+              "not",
+              "crosses_above",
+              "crosses_below"
+            ],
+            "title": "Op"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "periods": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periods"
+          },
+          "args": {
+            "items": {
+              "$ref": "#/components/schemas/Expression"
+            },
+            "type": "array",
+            "maxItems": 16,
+            "title": "Args"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "op"
+        ],
+        "title": "Expression"
+      },
+      "Feature": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "sma",
+              "ema",
+              "return",
+              "volatility",
+              "rolling_min",
+              "rolling_max"
+            ],
+            "title": "Kind"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "open",
+              "high",
+              "low",
+              "close",
+              "volume_base",
+              "volume_quote",
+              "trades"
+            ],
+            "title": "Field",
+            "default": "close"
+          },
+          "window": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 2.0,
+            "title": "Window"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": [
+              "1h",
+              "1d"
+            ],
+            "title": "Timeframe",
+            "default": "1h"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kind",
+          "window"
+        ],
+        "title": "Feature"
+      },
+      "Fill": {
+        "properties": {
+          "asset": {
+            "type": "string",
+            "title": "Asset"
+          },
+          "side": {
+            "type": "string",
+            "enum": [
+              "buy",
+              "sell"
+            ],
+            "title": "Side"
+          },
+          "open_time": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Open Time"
+          },
+          "decision_time": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Time"
+          },
+          "quantity": {
+            "type": "number",
+            "title": "Quantity"
+          },
+          "gross_quantity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gross Quantity"
+          },
+          "price": {
+            "type": "number",
+            "title": "Price"
+          },
+          "fee_quote_equivalent": {
+            "type": "number",
+            "title": "Fee Quote Equivalent"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "asset",
+          "side",
+          "open_time",
+          "decision_time",
+          "quantity",
+          "price",
+          "fee_quote_equivalent",
+          "reason"
+        ],
+        "title": "Fill"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Metrics": {
+        "properties": {
+          "net_return": {
+            "type": "number",
+            "title": "Net Return"
+          },
+          "annualized_return": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Annualized Return"
+          },
+          "annualized_return_overflow": {
+            "type": "boolean",
+            "title": "Annualized Return Overflow"
+          },
+          "max_drawdown": {
+            "type": "number",
+            "title": "Max Drawdown"
+          },
+          "benchmark_return": {
+            "type": "number",
+            "title": "Benchmark Return"
+          },
+          "completed_trade_count": {
+            "type": "integer",
+            "title": "Completed Trade Count"
+          },
+          "chunk_returns": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Chunk Returns"
+          },
+          "realized_pnl": {
+            "type": "number",
+            "title": "Realized Pnl"
+          },
+          "monthly_returns": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Monthly Returns"
+          },
+          "losing_months": {
+            "type": "integer",
+            "title": "Losing Months"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "net_return",
+          "annualized_return",
+          "annualized_return_overflow",
+          "max_drawdown",
+          "benchmark_return",
+          "completed_trade_count",
+          "chunk_returns",
+          "realized_pnl",
+          "monthly_returns",
+          "losing_months"
+        ],
+        "title": "Metrics"
+      },
+      "RetentionResult": {
+        "properties": {
+          "kept": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Kept"
+          },
+          "duplicates": {
+            "items": {
+              "$ref": "#/components/schemas/Duplicate"
+            },
+            "type": "array",
+            "title": "Duplicates"
+          },
+          "comparisons": {
+            "items": {
+              "$ref": "#/components/schemas/Comparison"
+            },
+            "type": "array",
+            "title": "Comparisons"
+          },
+          "failed_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Failed Rules"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "kept",
+          "duplicates",
+          "comparisons",
+          "failed_rules"
+        ],
+        "title": "RetentionResult"
+      },
+      "RuleOutcome": {
+        "properties": {
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "actual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Actual"
+          },
+          "required": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Required"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "passed",
+          "actual",
+          "required"
+        ],
+        "title": "RuleOutcome"
+      },
+      "Rules": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "initial_cash": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Initial Cash",
+            "default": 1000
+          },
+          "currency": {
+            "type": "string",
+            "const": "USDT",
+            "title": "Currency",
+            "default": "USDT"
+          },
+          "min_trades": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Min Trades",
+            "default": 300
+          },
+          "benchmark_annual_return": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Benchmark Annual Return",
+            "default": 0.02
+          },
+          "max_drawdown": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Drawdown",
+            "default": 0.2
+          },
+          "min_positive_chunks": {
+            "type": "integer",
+            "const": 2,
+            "title": "Min Positive Chunks",
+            "default": 2
+          },
+          "correlation_limit": {
+            "type": "number",
+            "const": 0.7,
+            "title": "Correlation Limit",
+            "default": 0.7
+          },
+          "correlation_min_days": {
+            "type": "integer",
+            "minimum": 3.0,
+            "title": "Correlation Min Days",
+            "default": 90
+          },
+          "small_gap_hours": {
+            "type": "integer",
+            "const": 4,
+            "title": "Small Gap Hours",
+            "default": 4
+          },
+          "idle_cash_annual_return": {
+            "type": "number",
+            "const": 0.0,
+            "title": "Idle Cash Annual Return",
+            "default": 0.0
+          },
+          "venue": {
+            "$ref": "#/components/schemas/Venue"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Rules"
+      },
+      "RunRequest": {
+        "properties": {
+          "experiment_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_-]{1,64}$",
+            "title": "Experiment Id"
+          },
+          "candidate_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Candidate Id"
+          },
+          "strategy": {
+            "$ref": "#/components/schemas/Strategy"
+          },
+          "period": {
+            "type": "string",
+            "enum": [
+              "build",
+              "test"
+            ],
+            "title": "Period",
+            "default": "build"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "end": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "experiment_id",
+          "candidate_id",
+          "strategy"
+        ],
+        "title": "RunRequest"
+      },
+      "Schedule": {
+        "properties": {
+          "frequency": {
+            "type": "string",
+            "enum": [
+              "hourly",
+              "daily",
+              "weekly"
+            ],
+            "title": "Frequency",
+            "default": "hourly"
+          },
+          "hour_utc": {
+            "type": "integer",
+            "maximum": 23.0,
+            "minimum": 0.0,
+            "title": "Hour Utc",
+            "default": 0
+          },
+          "weekday": {
+            "type": "integer",
+            "maximum": 6.0,
+            "minimum": 0.0,
+            "title": "Weekday",
+            "description": "Monday=0; weekly only",
+            "default": 0
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Schedule"
+      },
+      "Strategy": {
+        "properties": {
+          "schema_version": {
+            "type": "string",
+            "const": "1.0",
+            "title": "Schema Version",
+            "default": "1.0"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "assets": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "minItems": 1,
+            "title": "Assets"
+          },
+          "features": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Feature"
+            },
+            "type": "object",
+            "maxProperties": 32,
+            "title": "Features"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "signals",
+              "rank"
+            ],
+            "title": "Mode",
+            "default": "signals"
+          },
+          "entry": {
+            "$ref": "#/components/schemas/Expression"
+          },
+          "exit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Expression"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rank_by": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Expression"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "top_n": {
+            "type": "integer",
+            "maximum": 15.0,
+            "minimum": 1.0,
+            "title": "Top N",
+            "default": 5
+          },
+          "descending": {
+            "type": "boolean",
+            "title": "Descending",
+            "default": true
+          },
+          "allocation": {
+            "type": "string",
+            "enum": [
+              "fixed_fraction",
+              "equal_weight"
+            ],
+            "title": "Allocation",
+            "default": "fixed_fraction"
+          },
+          "fraction": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Fraction",
+            "default": 0.1
+          },
+          "max_exposure": {
+            "type": "number",
+            "maximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Exposure",
+            "default": 1
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "order_expiry_hours": {
+            "type": "integer",
+            "maximum": 168.0,
+            "minimum": 1.0,
+            "title": "Order Expiry Hours",
+            "default": 4
+          },
+          "max_holding_hours": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Holding Hours"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "assets"
+        ],
+        "title": "Strategy"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "Venue": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "revolut_x_pt",
+              "alpaca"
+            ],
+            "title": "Name",
+            "default": "revolut_x_pt"
+          },
+          "fee_bps": {
+            "type": "number",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Fee Bps",
+            "default": 9
+          },
+          "adverse_execution_bps": {
+            "type": "number",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Adverse Execution Bps",
+            "default": 5
+          },
+          "fee_asset": {
+            "type": "string",
+            "enum": [
+              "quote",
+              "received"
+            ],
+            "title": "Fee Asset",
+            "default": "quote"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Venue"
+      }
+    }
+  }
+}

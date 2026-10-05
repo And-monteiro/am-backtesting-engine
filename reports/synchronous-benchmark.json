@@ -1,0 +1,10 @@
+{
+  "synthetic_only": true,
+  "observations_per_asset": 76602,
+  "assets": 14,
+  "candidate": "weekly top-five 90-day momentum",
+  "simulation_seconds": 7.223,
+  "json_serialization_seconds": 0.07,
+  "response_bytes": 5340390,
+  "scope": "One synthetic simulation plus JSON serialization; excludes HTTP, SQLite and source CSV parsing. No real strategy was evaluated."
+}

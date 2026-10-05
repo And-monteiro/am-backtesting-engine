@@ -1,0 +1,9 @@
+.git
+.venv
+prices
+data
+state
+reports
+__pycache__
+.pytest_cache
+.ruff_cache

@@ -1,0 +1,301 @@
+{
+  "$defs": {
+    "Expression": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "constant",
+            "field",
+            "feature",
+            "lag",
+            "add",
+            "subtract",
+            "multiply",
+            "divide",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "eq",
+            "all",
+            "any",
+            "not",
+            "crosses_above",
+            "crosses_below"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "periods": {
+          "anyOf": [
+            {
+              "maximum": 10000,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Periods"
+        },
+        "args": {
+          "items": {
+            "$ref": "#/$defs/Expression"
+          },
+          "maxItems": 16,
+          "title": "Args",
+          "type": "array"
+        }
+      },
+      "required": [
+        "op"
+      ],
+      "title": "Expression",
+      "type": "object"
+    },
+    "Feature": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "sma",
+            "ema",
+            "return",
+            "volatility",
+            "rolling_min",
+            "rolling_max"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "field": {
+          "default": "close",
+          "enum": [
+            "open",
+            "high",
+            "low",
+            "close",
+            "volume_base",
+            "volume_quote",
+            "trades"
+          ],
+          "title": "Field",
+          "type": "string"
+        },
+        "window": {
+          "maximum": 10000,
+          "minimum": 2,
+          "title": "Window",
+          "type": "integer"
+        },
+        "timeframe": {
+          "default": "1h",
+          "enum": [
+            "1h",
+            "1d"
+          ],
+          "title": "Timeframe",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "window"
+      ],
+      "title": "Feature",
+      "type": "object"
+    },
+    "Schedule": {
+      "additionalProperties": false,
+      "properties": {
+        "frequency": {
+          "default": "hourly",
+          "enum": [
+            "hourly",
+            "daily",
+            "weekly"
+          ],
+          "title": "Frequency",
+          "type": "string"
+        },
+        "hour_utc": {
+          "default": 0,
+          "maximum": 23,
+          "minimum": 0,
+          "title": "Hour Utc",
+          "type": "integer"
+        },
+        "weekday": {
+          "default": 0,
+          "description": "Monday=0; weekly only",
+          "maximum": 6,
+          "minimum": 0,
+          "title": "Weekday",
+          "type": "integer"
+        }
+      },
+      "title": "Schedule",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "assets": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 15,
+      "minItems": 1,
+      "title": "Assets",
+      "type": "array"
+    },
+    "features": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Feature"
+      },
+      "maxProperties": 32,
+      "title": "Features",
+      "type": "object"
+    },
+    "mode": {
+      "default": "signals",
+      "enum": [
+        "signals",
+        "rank"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "entry": {
+      "$ref": "#/$defs/Expression"
+    },
+    "exit": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Expression"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "rank_by": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Expression"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "top_n": {
+      "default": 5,
+      "maximum": 15,
+      "minimum": 1,
+      "title": "Top N",
+      "type": "integer"
+    },
+    "descending": {
+      "default": true,
+      "title": "Descending",
+      "type": "boolean"
+    },
+    "allocation": {
+      "default": "fixed_fraction",
+      "enum": [
+        "fixed_fraction",
+        "equal_weight"
+      ],
+      "title": "Allocation",
+      "type": "string"
+    },
+    "fraction": {
+      "default": 0.1,
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "title": "Fraction",
+      "type": "number"
+    },
+    "max_exposure": {
+      "default": 1,
+      "exclusiveMinimum": 0,
+      "maximum": 1,
+      "title": "Max Exposure",
+      "type": "number"
+    },
+    "schedule": {
+      "$ref": "#/$defs/Schedule"
+    },
+    "order_expiry_hours": {
+      "default": 4,
+      "maximum": 168,
+      "minimum": 1,
+      "title": "Order Expiry Hours",
+      "type": "integer"
+    },
+    "max_holding_hours": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Max Holding Hours"
+    }
+  },
+  "required": [
+    "name",
+    "assets"
+  ],
+  "title": "Strategy",
+  "type": "object"
+}
