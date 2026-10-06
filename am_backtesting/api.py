@@ -14,11 +14,11 @@ from .models import (
     RetentionResult,
     RunRequest,
 )
-from .service import Service
+from .application import BacktestService
 from .util import EngineError, config_root
 
 
-def create_app(service: Service | None = None):
+def create_app(service: BacktestService | None = None):
     app = FastAPI(
         title="AM Backtesting Engine",
         version=__version__,
@@ -28,7 +28,7 @@ def create_app(service: Service | None = None):
 
     def get_service():
         if app.state.service is None:
-            app.state.service = Service(
+            app.state.service = BacktestService(
                 Path(os.environ.get("AM_DATA_ROOT", "data")),
                 Path(os.environ.get("AM_STATE_ROOT", "state")),
                 config_root(),
@@ -57,7 +57,7 @@ def create_app(service: Service | None = None):
 
     @app.get("/v1/experiments/{experiment_id}", response_model=ExperimentResponse)
     def experiment(experiment_id: str):
-        return get_service().repo.experiment(experiment_id)
+        return get_service().get_experiment(experiment_id)
 
     @app.post(
         "/v1/backtests",
@@ -69,11 +69,11 @@ def create_app(service: Service | None = None):
 
     @app.get("/v1/backtests/{run_id}", response_model=BacktestResult)
     def result(run_id: str):
-        return get_service().repo.run(run_id)
+        return get_service().get_result(run_id)
 
     @app.post("/v1/retention", response_model=RetentionResult)
     def retention(request: CorrelationRequest):
-        return get_service().retention(request.run_ids)
+        return get_service().retention(request)
 
     return app
 

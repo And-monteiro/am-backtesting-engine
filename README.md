@@ -1,29 +1,57 @@
 # AM Backtesting Engine
 
-A synchronous Python service that executes declarative, long-only spot crypto strategies for an AI-assisted Investment Strategy Finder. It simulates historical trades, applies costs, checks frozen evaluation rules, and returns reproducible results. It does not generate trading ideas or place broker orders.
+A Python backtesting library with a synchronous FastAPI service that executes declarative, long-only spot crypto strategies for an AI-assisted Investment Strategy Finder. It simulates historical trades, applies costs, checks frozen evaluation rules, and returns reproducible results. It does not generate trading ideas or place broker orders.
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    S[Strategy Finder] -->|Experiment + strategy JSON| A[FastAPI synchronous service]
-    A --> V[Contract validation]
-    V --> E[Chronological execution and accounting]
-    B[Build-only CSVs] --> E
-    P[Frozen experiment policy] --> E
-    E --> R[Metrics, trades, equity and rule outcomes]
-    R --> S
-    A --> DB[(SQLite policies, attempts and results)]
-    RAW[Local Binance CSVs] --> PREP[Administrative preparation]
-    PREP --> B
-    PREP --> SEALED[Sealed CSVs outside API mounts]
-    SEALED -->|Explicit user CLI unlock| U[Unlocked test CSVs]
-    U --> E
+    S[Strategy Finder] -->|HTTP JSON| A[FastAPI adapter]
+    PY[Python caller] --> L[Typed application API: BacktestService]
+    A --> L
+    L --> E[Chronological execution and accounting]
+    E --> D[In-memory candles, features and evaluation]
+    L --> DB[(SQLite policies, attempts and results)]
+    B[Build-only CSVs] --> L
+    U[Explicitly unlocked CSVs] --> L
+    CLI[Administrative CLI] --> ADMIN[Data preparation and synthetic proof functions]
+    RAW[Local Binance CSVs] --> ADMIN
+    ADMIN --> B
+    ADMIN --> SEALED[Sealed CSVs outside service mounts]
+    SEALED -->|Explicit user CLI unlock| U
 ```
 
 The strategist owns family selection, its pre-test discovery ledger, candidate generation/mutation, batch orchestration, notes, and search reports. The engine executes and evaluates candidates and provides correlation retention. A batch of 25 is initially 25 sequential HTTP requests. There is no queue, pub-sub broker, or polling job protocol. One simulation runs at a time; concurrent submissions receive HTTP 429 and can retry.
 
 The API persists candidate attempts before simulation and completed results afterward. Repeating the same candidate ID and identical request returns the stored result; reusing an ID for a different strategy/configuration fails. Experiments are immutable: create a new ID to change the maximum drawdown or other settings. These new experiments do not retroactively reclassify old results.
+
+## Direct Python usage
+
+The supported programmatic entrypoint is `from am_backtesting import BacktestService` (also available from `am_backtesting.application`). It accepts the same validated application models used by HTTP and returns a typed `BacktestResult`, without HTTP request/response objects. Install this repository with `pip install .` or `pip install -e .`; the package name remains `am-backtesting-engine`.
+
+After preparing permitted data and running current synthetic proof, one build backtest can be invoked as follows:
+
+```python
+from pathlib import Path
+
+from am_backtesting import BacktestService
+from am_backtesting.models import ExperimentCreate, RunRequest
+
+backtester = BacktestService(data=Path("data"), state=Path("state"), config=Path("config"))
+backtester.create(
+    ExperimentCreate.model_validate_json(Path("examples/experiment.json").read_text())
+)
+request = RunRequest.model_validate_json(Path("examples/crossover.json").read_text())
+result = backtester.run(request)
+print(result.metrics.net_return)
+# Use result.model_dump(mode="json") for the same JSON representation as HTTP.
+```
+
+`create`, `get_experiment`, `run`, `get_result`, and `retention` return typed application models; `retention` accepts `CorrelationRequest`. `require_proof` returns the current passing proof report. Invalid input fails model construction with Pydantic `ValidationError`; application failures raise `EngineError` (from `am_backtesting.application`) with the same code/message and status mapped by HTTP. The original `am_backtesting.service.Service` remains a compatibility wrapper returning dictionaries. See [Python contract and module boundaries](docs/python-library.md).
+
+Use one `BacktestService` instance per process, preserving the existing single-worker concurrency assumptions. Supply explicit absolute data/state/config paths when invoking an installed package from another directory; policy files and prepared datasets remain external deployment inputs, not implicit package defaults. Direct Python usage requires the same current persisted proof, immutable experiments, candidate audit/idempotency and build/unlocked partition checks as service usage. No `BacktestService` method prepares or unlocks holdout data.
+
+HTTP remains the intended isolation boundary for the deployed Strategy Finder: `Strategy Finder -> HTTP -> FastAPI -> library/core`. The second supported mode is `Python caller -> library/core`, for reuse, testing and future deployment choices. Direct callers must run with the same restricted filesystem access/mounts; Python code with host permissions is not sandboxed by importing a library. Holdout unlock remains an explicit administrative CLI operation, never automatic or available as an HTTP endpoint.
 
 ## Start with Docker Compose
 
