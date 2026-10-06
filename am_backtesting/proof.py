@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from pydantic import ValidationError
 
-from .data import FIELDS
+from .candles import FIELDS
 from .engine import simulate
 from .models import Expression, Rules, Strategy
 from .util import atomic_json, engine_hash, file_hash, fingerprint

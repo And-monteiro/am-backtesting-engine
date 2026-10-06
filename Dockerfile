@@ -12,6 +12,7 @@ FROM base AS test
 USER root
 RUN pip install --no-cache-dir '.[test]'
 COPY tests ./tests
+COPY contracts ./contracts
 USER engine
 CMD ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider"]
 

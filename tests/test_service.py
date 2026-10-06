@@ -140,7 +140,7 @@ def test_api_sync_result_and_retry(service, strategy):
 
 def test_candidate_logged_before_simulation(service, strategy, monkeypatch):
     service.create(ExperimentCreate(experiment_id="one"))
-    import am_backtesting.service as module
+    import am_backtesting.application as module
 
     original = module.simulate
 
@@ -200,3 +200,191 @@ def test_openapi_has_no_unlock_endpoint():
     assert "/v1/backtests" in schema["paths"]
     assert not any("unlock" in path for path in schema["paths"])
     assert schema["components"]["schemas"]["Strategy"]["additionalProperties"] is False
+
+
+@pytest.fixture
+def library(service):
+    from am_backtesting import BacktestService
+
+    return BacktestService(service.datasets.root, service.state, service.config)
+
+
+def test_direct_and_http_independent_execution_identical(library, tmp_path, strategy, monkeypatch):
+    from am_backtesting import BacktestService
+    from am_backtesting.models import BacktestResult
+    import am_backtesting.application as application
+
+    other = BacktestService(library.datasets.root, tmp_path / "http-state", library.config)
+    (other.state / "proof.json").write_text((library.state / "proof.json").read_text())
+    experiment = ExperimentCreate(experiment_id="parity")
+    direct_experiment = library.create(experiment)
+    client = TestClient(create_app(other))
+    assert client.post("/v1/experiments", json=experiment.model_dump(mode="json")).json() == (
+        direct_experiment.model_dump(mode="json")
+    )
+    request = RunRequest(experiment_id="parity", candidate_id="same", strategy=strategy)
+    calls = []
+    original = application.simulate
+
+    def counted(*args):
+        calls.append(True)
+        return original(*args)
+
+    monkeypatch.setattr(application, "simulate", counted)
+    direct = library.run(request)
+    response = client.post("/v1/backtests", json=request.model_dump(mode="json"))
+    assert response.status_code == 200, response.text
+    assert isinstance(direct, BacktestResult)
+    assert len(calls) == 2  # Independent stores: HTTP cannot simply replay the direct result.
+    assert response.json() == direct.model_dump(mode="json")
+    assert direct.fills and direct.costs.fees > 0
+    assert library.run(request) == direct
+    assert library.get_result(direct.run_id) == direct
+    assert library.get_experiment("parity") == direct_experiment
+    assert len(calls) == 2  # Identical retries use persisted results.
+
+
+@pytest.mark.parametrize("failure", ["sealed", "range", "missing", "proof", "busy", "reuse"])
+def test_library_and_http_engine_errors_equivalent(library, strategy, failure):
+    library.create(ExperimentCreate(experiment_id="errors"))
+    request = RunRequest(experiment_id="errors", candidate_id="a", strategy=strategy)
+    if failure == "sealed":
+        request = request.model_copy(update={"period": "test"})
+        library.datasets._read = lambda *a: pytest.fail("holdout file read attempted")
+    elif failure == "range":
+        request = RunRequest(
+            experiment_id="errors",
+            candidate_id="a",
+            strategy=strategy,
+            end="2024-10-06T00:00:00Z",
+        )
+    elif failure == "missing":
+        request = request.model_copy(update={"experiment_id": "missing"})
+    elif failure == "proof":
+        (library.state / "proof.json").write_text('{"passed": false}')
+    elif failure == "busy":
+        library.lock.acquire()
+    elif failure == "reuse":
+        library.run(request)
+        request = request.model_copy(
+            update={"strategy": strategy.model_copy(update={"fraction": 0.2})}
+        )
+    try:
+        with pytest.raises(EngineError) as caught:
+            library.run(request)
+        response = TestClient(create_app(library)).post(
+            "/v1/backtests", json=request.model_dump(mode="json")
+        )
+        assert response.status_code == caught.value.status
+        assert response.json() == {"code": caught.value.code, "message": caught.value.message}
+    finally:
+        if failure == "busy":
+            library.lock.release()
+
+
+@pytest.mark.parametrize("invalid", ["same_open", "negative_lag", "unknown_feature", "zero_fee"])
+def test_library_and_http_validation_errors_equivalent(library, strategy, invalid):
+    from pydantic import ValidationError
+
+    payload = RunRequest(
+        experiment_id="validation", candidate_id="a", strategy=strategy
+    ).model_dump(mode="json")
+    model, endpoint = RunRequest, "/v1/backtests"
+    if invalid == "same_open":
+        payload["strategy"]["execution"] = "same_open"
+    elif invalid == "negative_lag":
+        payload["strategy"]["entry"] = {
+            "op": "lag",
+            "periods": -1,
+            "args": [{"op": "field", "name": "close"}],
+        }
+    elif invalid == "unknown_feature":
+        payload["strategy"]["entry"] = {"op": "feature", "name": "missing"}
+    else:
+        payload = {"experiment_id": "validation", "rules": {"venue": {"fee_bps": 0}}}
+        model, endpoint = ExperimentCreate, "/v1/experiments"
+    with pytest.raises(ValidationError) as caught:
+        model.model_validate(payload)
+    response = TestClient(create_app(library)).post(endpoint, json=payload)
+    assert response.status_code == 422
+    direct_errors = [(list(e["loc"]), e["type"], e["msg"]) for e in caught.value.errors()]
+    http_errors = [(e["loc"][1:], e["type"], e["msg"]) for e in response.json()["detail"]]
+    assert http_errors == direct_errors
+
+
+def test_library_and_http_retention_identical(library, strategy):
+    from am_backtesting.models import CorrelationRequest, RetentionResult
+
+    library.create(ExperimentCreate(experiment_id="retain"))
+    runs = [
+        library.run(RunRequest(experiment_id="retain", candidate_id=c, strategy=strategy))
+        for c in ["a", "b"]
+    ]
+    request = CorrelationRequest(run_ids=[r.run_id for r in runs])
+    direct = library.retention(request)
+    assert isinstance(direct, RetentionResult)
+    response = TestClient(create_app(library)).post(
+        "/v1/retention", json=request.model_dump(mode="json")
+    )
+    assert response.status_code == 200
+    assert response.json() == direct.model_dump(mode="json")
+
+
+def test_stale_proof_fingerprint_rejected_by_both_paths(library, strategy):
+    report_path = library.state / "proof.json"
+    report = json.loads(report_path.read_text())
+    report["engine_sha256"] = "stale-engine"
+    report_path.write_text(json.dumps(report))
+    request = RunRequest(experiment_id="one", candidate_id="a", strategy=strategy)
+    with pytest.raises(EngineError) as caught:
+        library.run(request)
+    response = TestClient(create_app(library)).post(
+        "/v1/backtests", json=request.model_dump(mode="json")
+    )
+    assert caught.value.code == "PROOF_REQUIRED"
+    assert response.status_code == 409
+    assert response.json()["code"] == caught.value.code
+
+
+def test_cli_preparation_and_explicit_unlock_use_only_synthetic_data(prepared, tmp_path):
+    import subprocess
+    import sys
+
+    target = tmp_path / "cli-data"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "am_backtesting",
+            "prepare",
+            "--source",
+            str(prepared.parent / "raw"),
+            "--destination",
+            str(target),
+        ],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert set(json.loads(result.stdout)) == {"modern", "xmr"}
+    command = [
+        sys.executable,
+        "-m",
+        "am_backtesting",
+        "unlock",
+        "--sealed",
+        str(target / "sealed"),
+        "--destination",
+        str(target / "unlocked"),
+        "--track",
+        "modern",
+    ]
+    denied = subprocess.run(command, capture_output=True, text=True)
+    assert denied.returncode == 1
+    assert json.loads(denied.stdout)["code"] == "ACK_REQUIRED"
+    assert not (target / "unlocked/modern").exists()
+    allowed = subprocess.run(
+        command + ["--acknowledge-unseen-data-is-spent"], check=True, capture_output=True, text=True
+    )
+    assert json.loads(allowed.stdout)["unseen_data_spent"] is True
+    assert (target / "unlocked/modern/unlock.json").exists()

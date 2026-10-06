@@ -5,7 +5,7 @@ import math
 import numpy as np
 import pandas as pd
 
-from .data import hourly_grid
+from .candles import hourly_grid
 from .features import boolean_array, expression_series, feature_series
 from .models import Instrument, Rules, Strategy
 from .util import EngineError
